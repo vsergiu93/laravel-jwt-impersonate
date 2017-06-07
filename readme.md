@@ -1,7 +1,5 @@
 # Laravel Impersonate
 
-[![Build Status](https://travis-ci.org/404labfr/laravel-impersonate.svg?branch=master)](https://travis-ci.org/404labfr/laravel-impersonate) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/404labfr/laravel-impersonate/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/404labfr/laravel-impersonate/?branch=master)
-
 **Laravel Impersonate** makes it easy to **authenticate as your users**. Add a simple **trait** to your **user model** and impersonate as one of your users in one click.
  
 - [Requirements](#requirements)
@@ -23,23 +21,24 @@
 
 - Laravel >= 5.4
 - PHP >= 5.6
+- JWT-Auth
 
 ## Installation
 
 - Require it with Composer:
 ```bash
-composer require lab404/laravel-impersonate
+composer require rickycezar/laravel-impersonate
 ```
 
 - Add the service provider at the end of your `config/app.php`:
 ```php
 'providers' => [
     // ...
-    Lab404\Impersonate\ImpersonateServiceProvider::class,
+    Rickycezar\Impersonate\ImpersonateServiceProvider::class,
 ],
 ```
 
-- Add the trait `Lab404\Impersonate\Models\Impersonate` to your **User** model.
+- Add the trait `Rickycezar\Impersonate\Models\Impersonate` to your **User** model.
 
 ## Simple usage
 
@@ -206,18 +205,6 @@ But you don\'t want that button next to the current authenticated user neither t
     <a href="{{ route('impersonate.leave') }}">Leave impersonation</a>
 @endImpersonating
 ```
-
-## Tests
-
-```bash
-vendor/bin/phpunit
-```
-
-## Contributors
-
-- [MarceauKa](https://github.com/MarceauKa)
-- [tghpow](https://github.com/tghpow)
-- and all others [contributors](https://github.com/404labfr/laravel-impersonate/graphs/contributors)
 
 ## Licence
 
