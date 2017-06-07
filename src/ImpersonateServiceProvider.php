@@ -1,18 +1,18 @@
 <?php
 
-namespace Lab404\Impersonate;
+namespace Rickycezar\Impersonate;
 
 use Illuminate\Auth\AuthManager;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Blade;
-use Lab404\Impersonate\Guard\SessionGuard;
-use Lab404\Impersonate\Middleware\ProtectFromImpersonation;
-use Lab404\Impersonate\Services\ImpersonateManager;
+use Rickycezar\Impersonate\Guard\SessionGuard;
+use Rickycezar\Impersonate\Middleware\ProtectFromImpersonation;
+use Rickycezar\Impersonate\Services\ImpersonateManager;
 
 /**
  * Class ServiceProvider
  *
- * @package Lab404\Impersonate
+ * @package Rickycezar\Impersonate
  */
 class ImpersonateServiceProvider extends \Illuminate\Support\ServiceProvider
 {
@@ -24,7 +24,7 @@ class ImpersonateServiceProvider extends \Illuminate\Support\ServiceProvider
     /**
      * @var string
      */
-    protected $configName = 'laravel-impersonate';
+    protected $configName = 'laravel-jwt-impersonate';
 
     /**
      * Register the service provider.
@@ -105,9 +105,9 @@ class ImpersonateServiceProvider extends \Illuminate\Support\ServiceProvider
 
         $router->macro('impersonate', function () use ($router) {
             $router->get('/impersonate/take/{id}',
-                '\Lab404\Impersonate\Controllers\ImpersonateController@take')->name('impersonate');
+                '\Rickycezar\Impersonate\Controllers\ImpersonateController@take')->name('impersonate')->middleware('auth:api');
             $router->get('/impersonate/leave',
-                '\Lab404\Impersonate\Controllers\ImpersonateController@leave')->name('impersonate.leave');
+                '\Rickycezar\Impersonate\Controllers\ImpersonateController@leave')->name('impersonate.leave')->middleware('auth:api');
         });
     }
 

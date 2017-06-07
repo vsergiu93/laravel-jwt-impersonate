@@ -1,11 +1,16 @@
 <?php
 
-namespace Lab404\Impersonate\Services;
+namespace Rickycezar\Impersonate\Services;
 
+use Rickycezar\Impersonate\Exceptions\AlreadyImpersonatingException;
+use Rickycezar\Impersonate\Exceptions\CantBeImpersonatedException;
+use Rickycezar\Impersonate\Exceptions\CantImpersonateException;
+use Rickycezar\Impersonate\Exceptions\CantImpersonateSelfException;
+use Rickycezar\Impersonate\Exceptions\NotImpersonatingException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Application;
-use Lab404\Impersonate\Events\LeaveImpersonation;
-use Lab404\Impersonate\Events\TakeImpersonation;
+use Rickycezar\Impersonate\Events\LeaveImpersonation;
+use Rickycezar\Impersonate\Events\TakeImpersonation;
 
 class ImpersonateManager
 {
@@ -64,20 +69,30 @@ class ImpersonateManager
      */
     public function take($from, $to)
     {
-        try {
-            session()->put(config('laravel-impersonate.session_key'), $from->getKey());
+        if (!$this->isImpersonating()) {
+            if (!($to->getKey() == $from->getKey())) {
+                if ($to->canBeImpersonated()) {
+                    if ($from->canImpersonate()) {
+                        session()->put(config('laravel-jwt-impersonate.session_key'), $from->getKey());
 
-            $this->app['auth']->quietLogout();
-            $this->app['auth']->quietLogin($to);
+                        $this->app['auth']->logout();
+                        $token = $this->app['auth']->login($to);
 
-        } catch (\Exception $e) {
-            unset($e);
-            return false;
+                        $this->app['events']->fire(new TakeImpersonation($from, $to));
+
+                        return $token;
+                    } else {
+                        throw new CantImpersonateException();
+                    }
+                } else {
+                    throw new CantBeImpersonatedException();
+                }
+            } else {
+                throw new CantImpersonateSelfException();
+            }
+        } else {
+            throw new AlreadyImpersonatingException();
         }
-
-        $this->app['events']->fire(new TakeImpersonation($from, $to));
-
-        return true;
     }
 
     /**
@@ -85,23 +100,21 @@ class ImpersonateManager
      */
     public function leave()
     {
-        try {
+        if ($this->isImpersonating()) {
             $impersonated = $this->app['auth']->user();
             $impersonator = $this->findUserById($this->getImpersonatorId());
 
-            $this->app['auth']->quietLogout();
-            $this->app['auth']->quietLogin($impersonator);
-            
+            $this->app['auth']->logout();
+            $token = $this->app['auth']->login($impersonator);
+
             $this->clear();
 
-        } catch (\Exception $e) {
-            unset($e);
-            return false;
+            $this->app['events']->fire(new LeaveImpersonation($impersonator, $impersonated));
+
+            return $token;
+        } else {
+            throw new NotImpersonatingException();
         }
-
-        $this->app['events']->fire(new LeaveImpersonation($impersonator, $impersonated));
-
-        return true;
     }
 
     /**
@@ -117,7 +130,7 @@ class ImpersonateManager
      */
     public function getSessionKey()
     {
-        return config('laravel-impersonate.session_key');
+        return config('laravel-jwt-impersonate.session_key');
     }
 
     /**
@@ -126,9 +139,9 @@ class ImpersonateManager
     public function getTakeRedirectTo()
     {
         try {
-            $uri = route(config('laravel-impersonate.take_redirect_to'));
+            $uri = route(config('laravel-jwt-impersonate.take_redirect_to'));
         } catch (\InvalidArgumentException $e) {
-            $uri = config('laravel-impersonate.take_redirect_to');
+            $uri = config('laravel-jwt-impersonate.take_redirect_to');
         }
 
         return $uri;
@@ -140,9 +153,9 @@ class ImpersonateManager
     public function getLeaveRedirectTo()
     {
         try {
-            $uri = route(config('laravel-impersonate.leave_redirect_to'));
+            $uri = route(config('laravel-jwt-impersonate.leave_redirect_to'));
         } catch (\InvalidArgumentException $e) {
-            $uri = config('laravel-impersonate.leave_redirect_to');
+            $uri = config('laravel-jwt-impersonate.leave_redirect_to');
         }
 
         return $uri;

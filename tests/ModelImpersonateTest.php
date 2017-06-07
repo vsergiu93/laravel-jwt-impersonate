@@ -1,8 +1,8 @@
 <?php
 
-namespace Lab404\Tests;
+namespace Rickycezar\Tests;
 
-use Lab404\Impersonate\Services\ImpersonateManager;
+use Rickycezar\Impersonate\Services\ImpersonateManager;
 
 class ModelImpersonateTest extends TestCase
 {

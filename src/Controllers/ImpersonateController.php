@@ -1,11 +1,11 @@
 <?php
 
-namespace Lab404\Impersonate\Controllers;
+namespace Rickycezar\Impersonate\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Lab404\Impersonate\Services\ImpersonateManager;
+use Rickycezar\Impersonate\Services\ImpersonateManager;
 
 class ImpersonateController extends Controller
 {
@@ -17,8 +17,6 @@ class ImpersonateController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
-
         $this->manager = app()->make(ImpersonateManager::class);
     }
 
@@ -28,31 +26,14 @@ class ImpersonateController extends Controller
      */
     public function take(Request $request, $id)
     {
-        // Cannot impersonate yourself
-        if ($id == $request->user()->getKey()) {
-            abort(403);
-        }
-
-        // Cannot impersonate again if you're already impersonate a user
-        if ($this->manager->isImpersonating()) {
-            abort(403);
-        }
-
-        if (!$request->user()->canImpersonate()) {
-            abort(403);
-        }
-
         $user_to_impersonate = $this->manager->findUserById($id);
 
-        if ($user_to_impersonate->canBeImpersonated()) {
-            if ($this->manager->take($request->user(), $user_to_impersonate)) {
-                $takeRedirect = $this->manager->getTakeRedirectTo();
-                if ($takeRedirect !== 'back') {
-                    return redirect()->to($takeRedirect);
-                }
+        if ($this->manager->take($request->user(), $user_to_impersonate)) {
+            $takeRedirect = $this->manager->getTakeRedirectTo();
+            if ($takeRedirect !== 'back') {
+                return redirect()->to($takeRedirect);
             }
         }
-
         return redirect()->back();
     }
 

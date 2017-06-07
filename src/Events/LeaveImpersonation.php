@@ -1,6 +1,6 @@
 <?php
 
-namespace Lab404\Impersonate\Events;
+namespace Rickycezar\Impersonate\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Database\Eloquent\Model;

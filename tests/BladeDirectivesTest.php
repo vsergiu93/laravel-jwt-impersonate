@@ -1,8 +1,8 @@
 <?php
 
-namespace Lab404\Tests;
+namespace Rickycezar\Tests;
 
-use Lab404\Tests\Stubs\Models\User;
+use Rickycezar\Tests\Stubs\Models\User;
 
 class BladeDirectivesTest extends TestCase
 {

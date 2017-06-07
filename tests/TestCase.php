@@ -1,9 +1,9 @@
 <?php
 
-namespace Lab404\Tests;
+namespace Rickycezar\Tests;
 
-use Lab404\Impersonate\ImpersonateServiceProvider;
-use Lab404\Tests\Stubs\Models\User;
+use Rickycezar\Impersonate\ImpersonateServiceProvider;
+use Rickycezar\Tests\Stubs\Models\User;
 use Orchestra\Database\ConsoleServiceProvider;
 
 class TestCase extends \Orchestra\Testbench\TestCase
