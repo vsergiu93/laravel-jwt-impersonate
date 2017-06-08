@@ -12,6 +12,7 @@ class CantImpersonateException extends \Exception{
     public function __construct(){
         $this->patternMessage   = 'This user can\'t impersonate.';
         $this->errorMessage     = $this->patternMessage;
+        $this->message     = $this->patternMessage;
         $this->errorCode        = 403;
     }
 

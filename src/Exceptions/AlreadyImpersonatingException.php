@@ -12,6 +12,7 @@ class AlreadyImpersonatingException extends \Exception{
     public function __construct(){
         $this->patternMessage     = 'This user is already impersonating someone.';
         $this->errorMessage     = $this->patternMessage;
+        $this->message     = $this->patternMessage;
         $this->errorCode        = 403;
     }
 

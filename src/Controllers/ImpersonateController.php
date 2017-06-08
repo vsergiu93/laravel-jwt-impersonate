@@ -12,9 +12,6 @@ class ImpersonateController extends Controller
     /** @var ImpersonateManager */
     protected $manager;
 
-    /**
-     * ImpersonateController constructor.
-     */
     public function __construct()
     {
         $this->manager = app()->make(ImpersonateManager::class);
@@ -26,32 +23,37 @@ class ImpersonateController extends Controller
      */
     public function take(Request $request, $id)
     {
-        $user_to_impersonate = $this->manager->findUserById($id);
-
-        if ($this->manager->take($request->user(), $user_to_impersonate)) {
-            $takeRedirect = $this->manager->getTakeRedirectTo();
-            if ($takeRedirect !== 'back') {
-                return redirect()->to($takeRedirect);
-            }
-        }
-        return redirect()->back();
+        $persona = $this->manager->findUserById(intval($id));
+        $impersonator = $request->user();
+        $token = $this->manager->take($impersonator, $persona);
+        $response = [
+            'success' => $this->manager->isImpersonating(),
+            'data' => [
+                'id-requested' => intval($id),
+                'persona' => $request->user(),
+                'impersonator' => $impersonator,
+                'token' => $token,
+            ],
+            'msg' => ''
+        ];
+        return response()->json($response);
     }
 
     /*
-     * @return RedirectResponse
+     * @return Response
      */
-    public function leave()
+    public function leave(Request $request)
     {
-        if (!$this->manager->isImpersonating()) {
-            abort(403);
-        }
-
-        $this->manager->leave();
-
-        $leaveRedirect = $this->manager->getLeaveRedirectTo();
-        if ($leaveRedirect !== 'back') {
-            return redirect()->to($leaveRedirect);
-        }
-        return redirect()->back();
+        $token = $request->user()->leaveImpersonation();
+        $response = [
+            'success' => true,
+            'data' => [
+                'success' => !$this->manager->isImpersonating(),
+                'persona' => $request->user(),
+                'token' => $token,
+            ],
+            'msg' => ''
+        ];
+        return response()->json($response);
     }
 }

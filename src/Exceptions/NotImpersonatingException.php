@@ -12,6 +12,7 @@ class NotImpersonatingException extends \Exception{
     public function __construct(){
         $this->patternMessage   = 'This user is not impersonating.';
         $this->errorMessage     = $this->patternMessage;
+        $this->message     = $this->patternMessage;
         $this->errorCode        = 403;
     }
 

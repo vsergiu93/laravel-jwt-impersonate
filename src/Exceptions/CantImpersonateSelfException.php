@@ -12,6 +12,7 @@ class CantImpersonateSelfException extends \Exception{
     public function __construct(){
         $this->patternMessage     = 'It is not possible to impersonate self.';
         $this->errorMessage     = $this->patternMessage;
+        $this->message     = $this->patternMessage;
         $this->errorCode        = 403;
     }
 
