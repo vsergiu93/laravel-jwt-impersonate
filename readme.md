@@ -1,4 +1,7 @@
-# Laravel Impersonate
+# Laravel JWT Impersonate
+
+**DISCLAIMER:** This is a fork of [lab404/laravel-impersonate](https://github.com/404labfr/laravel-impersonate) patched to work with JWTAuth in a REST API application. I'll Always recommend you to use the original component.  
+
 
 **Laravel Impersonate** makes it easy to **authenticate as your users**. Add a simple **trait** to your **user model** and impersonate as one of your users in one click.
  
@@ -10,9 +13,9 @@
     - [Defining impersonation authorization](#defining-impersonation-authorization)
     - [Using your own strategy](#using-your-own-strategy)
     - [Middleware](#middleware)
+    - [Exceptions](#exceptions)
     - [Events](#events)
 - [Configuration](#configuration)
-- [Blade](#blade)
 - [Tests](#tests)
 - [Contributors](#contributors)
 
@@ -21,7 +24,7 @@
 
 - Laravel >= 5.4
 - PHP >= 5.6
-- JWT-Auth
+- JWT-Auth >= dev-develop
 
 ## Installation
 
@@ -44,29 +47,31 @@ composer require rickycezar/laravel-impersonate
 
 Impersonate an user:
 ```php
-Auth::user()->impersonate($other_user);
-// You're now logged as the $other_user
+$token = Auth::user()->impersonate($other_user);
+// You're now logged as the $other_user and the authentication token is stored in $token.
 ```
 
 Leave impersonation:
 ```php
-Auth::user()->leaveImpersonation();
-// You're now logged as your original user.
+$token = Auth::user()->leaveImpersonation();
+// You're now logged as your original user and the authentication token is stored in $token.
 ```
 
 ### Using the built-in controller
 
-In your routes file you must call the `impersonate` route macro. 
+In your routes file you can call the `impersonate` route macro if you want to use the built-in controller. 
 ```php
 Route::impersonate();
 ```
 
 ```php
 // Where $id is the ID of the user you want impersonate
-route('impersonate', $id)
+route('impersonate', $id) //the url path is "impersonate/take/{id}".
+```
 
+```php
 // Generate an URL to leave current impersonation
-route('impersonate.leave')
+route('impersonate.leave') //the url path is "impersonate/leave".
 ```
 
 ## Advanced Usage
@@ -121,11 +126,11 @@ $manager->findUserById($id);
 // TRUE if your are impersonating an user.
 $manager->isImpersonating();
 
-// Impersonate an user. Pass the original user and the user you want to impersonate
-$manager->take($from, $to);
+// Impersonate an user. Pass the original user and the user you want to impersonate. Returns authentication token
+$token = $manager->take($from, $to);
 
-// Leave current impersonation
-$manager->leave();
+// Leave current impersonation. Returns authentication token
+$token = $manager->leave();
 
 // Get the impersonator ID
 $manager->getImpersonatorId();
@@ -143,6 +148,18 @@ Router::get('/my-credit-card', function() {
     echo "Can't be accessed by an impersonator";
 })->middleware('impersonate.protect');
 ```
+
+### Exceptions
+
+There are six possible exceptions thrown by the service:
+- `AlreadyImpersonatingException` is thrown when an impersonator tries to take another persona without leaving the first one.
+- `CantBeImpersonatedException` is thrown when the method `canBeImpersonated()` fails.
+- `CantImpersonateException` is thrown when the method `canImpersonate()` fails.
+- `CantImpersonateSelfException` is thrown when an user tries to impersonate self.
+- `NotImpersonatingException` is thrown when an user tries to leave an impersonation without being impersonating.
+- `ProtectedFromImpersonationException` is thrown when an impersonator tries to get access to a route protected by the middleware.
+
+Each exception have a message and a status code available through the respective methods `getErrorMessage()` and `getErrorCode()`.
 
 ### Events
 
@@ -163,47 +180,8 @@ php artisan vendor:publish --tag=impersonate
 
 Available options:
 ```php
-    // The session key used to store the original user id.
+    // The custom claim key used to store the original user id in the JWT token.
     'session_key' => 'impersonated_by',
-    // Where to redirect after taking an impersonation.
-    // Only used in the built-in controller.
-    // You can use: an URI, the keyword back (to redirect back) or a route name
-    'take_redirect_to' => '/',
-    // Where to redirect after leaving an impersonation.
-    // Only used in the built-in controller.
-    // You can use: an URI, the keyword back (to redirect back) or a route name
-    'leave_redirect_to' => '/'
-```
-
-## Blade
-
-There are three Blade directives available.
-
-### When the user can impersonate
-
-```blade
-@canImpersonate
-    <a href="{{ route('impersonate', $user->id) }}">Impersonate this user</a>
-@endCanImpersonate
-```
-
-### When the user can be impersonated
-
-This comes in handy when you have a user list and want to show an "Impersonate" button next to all the users.
-But you don\'t want that button next to the current authenticated user neither to that users which should not be able to impersonated according your implementation of `canBeImpersonated()` . 
-
-```blade
-@canBeImpersonated($user)
-    <a href="{{ route('impersonate', $user->id) }}">Impersonate this user</a>
-@endBeImpersonated
-```
-
-### When the user is impersonated
-
-```blade
-@impersonating
-    <a href="{{ route('impersonate.leave') }}">Leave impersonation</a>
-@endImpersonating
 ```
 
 ## Licence

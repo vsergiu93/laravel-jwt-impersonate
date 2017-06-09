@@ -11,9 +11,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Application;
 use Rickycezar\Impersonate\Events\LeaveImpersonation;
 use Rickycezar\Impersonate\Events\TakeImpersonation;
-use Illuminate\Contracts\Cache\Repository as Cache;
 
-class ImpersonateManager
+class SessionStorage
 {
     /**
      * @var Application
@@ -24,12 +23,10 @@ class ImpersonateManager
      * UserFinder constructor.
      *
      * @param Application $app
-     * @param Cache $cache
      */
-    public function __construct(Application $app, Cache $cache)
+    public function __construct(Application $app)
     {
         $this->app = $app;
-        $this->cache = $cache;
     }
 
     /**
@@ -53,7 +50,7 @@ class ImpersonateManager
      */
     public function isImpersonating()
     {
-        return !empty($this->getImpersonatorId());
+        return session()->has($this->getSessionKey());
     }
 
     /**
@@ -62,7 +59,7 @@ class ImpersonateManager
      */
     public function getImpersonatorId()
     {
-        return $this->app['auth']->parseToken()->getPayLoad()->get($this->getSessionKey());
+        return session($this->getSessionKey(), null);
     }
 
     /**
@@ -76,10 +73,13 @@ class ImpersonateManager
             if (!($to->getKey() == $from->getKey())) {
                 if ($to->canBeImpersonated()) {
                     if ($from->canImpersonate()) {
+                        session()->put(config('laravel-jwt-impersonate.session_key'), $from->getKey());
+
                         $this->app['auth']->logout();
-                        $this->app['auth']->customClaims([$this->getSessionKey() => $from->getKey()]);
                         $token = $this->app['auth']->login($to);
+
                         $this->app['events']->fire(new TakeImpersonation($from, $to));
+
                         return $token;
                     } else {
                         throw new CantImpersonateException();
@@ -122,7 +122,7 @@ class ImpersonateManager
      */
     public function clear()
     {
-        $this->app['auth']->customClaims([$this->getSessionKey() => null]);
+        session()->forget($this->getSessionKey());
     }
 
     /**

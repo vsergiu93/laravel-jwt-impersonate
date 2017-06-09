@@ -59,9 +59,6 @@ trait Impersonate
      */
     public function leaveImpersonation()
     {
-        if ($this->isImpersonated())
-        {
-            return app(ImpersonateManager::class)->leave();
-        }
+        return app(ImpersonateManager::class)->leave();
     }
 }

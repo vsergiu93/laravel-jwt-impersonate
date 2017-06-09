@@ -3,7 +3,7 @@
 return [
     
     /**
-     * The session key used to store the original user id.
+     * The key used to store the original user id.
      */
     'session_key' => 'impersonated_by',
 

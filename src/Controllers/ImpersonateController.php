@@ -34,7 +34,6 @@ class ImpersonateController extends Controller
                 'impersonator' => $impersonator,
                 'token' => $token,
             ],
-            'msg' => ''
         ];
         return response()->json($response);
     }
@@ -46,13 +45,12 @@ class ImpersonateController extends Controller
     {
         $token = $request->user()->leaveImpersonation();
         $response = [
-            'success' => true,
+            'success' => !$this->manager->isImpersonating(),
             'data' => [
                 'success' => !$this->manager->isImpersonating(),
                 'persona' => $request->user(),
                 'token' => $token,
             ],
-            'msg' => ''
         ];
         return response()->json($response);
     }

@@ -3,7 +3,7 @@
 namespace Rickycezar\Impersonate\Middleware;
 
 use Closure;
-use Illuminate\Support\Facades\Redirect;
+use Rickycezar\Impersonate\Exceptions\ProtectedAgainstImpersonationException;
 use Rickycezar\Impersonate\Services\ImpersonateManager;
 
 class ProtectFromImpersonation
@@ -20,7 +20,7 @@ class ProtectFromImpersonation
         $impersonate_manager = app()->make(ImpersonateManager::class);
 
         if ($impersonate_manager->isImpersonating()) {
-            return Redirect::back();
+            throw new ProtectedAgainstImpersonationException();
         }
 
         return $next($request);
