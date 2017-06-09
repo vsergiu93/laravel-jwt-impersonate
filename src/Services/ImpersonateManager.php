@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Application;
 use Rickycezar\Impersonate\Events\LeaveImpersonation;
 use Rickycezar\Impersonate\Events\TakeImpersonation;
-use Illuminate\Contracts\Cache\Repository as Cache;
 
 class ImpersonateManager
 {
@@ -26,10 +25,9 @@ class ImpersonateManager
      * @param Application $app
      * @param Cache $cache
      */
-    public function __construct(Application $app, Cache $cache)
+    public function __construct(Application $app)
     {
         $this->app = $app;
-        $this->cache = $cache;
     }
 
     /**
