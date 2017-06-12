@@ -108,6 +108,8 @@ class ImpersonateServiceProvider extends \Illuminate\Support\ServiceProvider
                 '\Rickycezar\Impersonate\Controllers\ImpersonateController@take')->name('impersonate')->middleware('auth:api');
             $router->get('/impersonate/leave',
                 '\Rickycezar\Impersonate\Controllers\ImpersonateController@leave')->name('impersonate.leave')->middleware('auth:api');
+            $router->get('/impersonate/info',
+                '\Rickycezar\Impersonate\Controllers\ImpersonateController@info')->name('impersonate.info')->middleware('auth:api');
         });
     }
 

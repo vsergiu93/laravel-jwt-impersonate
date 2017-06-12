@@ -64,6 +64,15 @@ class ImpersonateManager
     }
 
     /**
+     * @param   $impersonator
+     * @return  int|null
+     */
+    public function setImpersonatorId($impersonator)
+    {
+        $this->app['auth']->customClaims([$this->getSessionKey() => $impersonator->getKey()]);
+    }
+
+    /**
      * @param Model $from
      * @param Model $to
      * @return bool
@@ -74,10 +83,12 @@ class ImpersonateManager
             if (!($to->getKey() == $from->getKey())) {
                 if ($to->canBeImpersonated()) {
                     if ($from->canImpersonate()) {
-                        $this->app['auth']->logout();
-                        $this->app['auth']->customClaims([$this->getSessionKey() => $from->getKey()]);
-                        $token = $this->app['auth']->login($to);
+                        $this->quietLogout();
+                        $this->setImpersonatorId($from);
+                        $token = $this->quietLogin($to);
+
                         $this->app['events']->fire(new TakeImpersonation($from, $to));
+
                         return $token;
                     } else {
                         throw new CantImpersonateException();
@@ -101,11 +112,9 @@ class ImpersonateManager
         if ($this->isImpersonating()) {
             $impersonated = $this->app['auth']->user();
             $impersonator = $this->findUserById($this->getImpersonatorId());
-
-            $this->app['auth']->logout();
-            $token = $this->app['auth']->login($impersonator);
-
+            $this->quietLogout();
             $this->clear();
+            $token = $this->quietLogin($impersonator);
 
             $this->app['events']->fire(new LeaveImpersonation($impersonator, $impersonated));
 
@@ -113,6 +122,29 @@ class ImpersonateManager
         } else {
             throw new NotImpersonatingException();
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function retrieveToken()
+    {
+        return $this->app['auth']->getToken();
+    }
+
+    public function quietLogout()
+    {
+        $this->app['auth']->logout();
+    }
+
+    /**
+     * @return string
+     */
+    public function quietLogin($impersonator)
+    {
+        $token = $this->app['auth']->login($impersonator);
+        $this->app['auth']->setToken($token);
+        return $token;
     }
 
     /**

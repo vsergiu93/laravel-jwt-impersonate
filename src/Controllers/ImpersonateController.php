@@ -27,9 +27,8 @@ class ImpersonateController extends Controller
         $impersonator = $request->user();
         $token = $this->manager->take($impersonator, $persona);
         $response = [
-            'success' => $this->manager->isImpersonating(),
             'data' => [
-                'id-requested' => intval($id),
+                'requested_id' => intval($id),
                 'persona' => $request->user(),
                 'impersonator' => $impersonator,
                 'token' => $token,
@@ -45,10 +44,22 @@ class ImpersonateController extends Controller
     {
         $token = $request->user()->leaveImpersonation();
         $response = [
-            'success' => !$this->manager->isImpersonating(),
             'data' => [
-                'success' => !$this->manager->isImpersonating(),
                 'persona' => $request->user(),
+                'token' => $token,
+            ],
+        ];
+        return response()->json($response);
+    }
+
+    public function info(Request $request)
+    {
+        $token = $request->bearerToken();
+        $response = [
+            'impersonating' => $this->manager->isImpersonating(),
+            'data' => [
+                'persona' => $request->user(),
+                'impersonator' => $this->manager->isImpersonating() ? $this->manager->findUserById($this->manager->getImpersonatorId()) : null,
                 'token' => $token,
             ],
         ];
