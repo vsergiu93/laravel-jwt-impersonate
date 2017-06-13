@@ -74,6 +74,11 @@ route('impersonate', $id) //the url path is "impersonate/take/{id}".
 route('impersonate.leave') //the url path is "impersonate/leave".
 ```
 
+```php
+// Generate an URL to leave current impersonation
+route('impersonate.info') //the url path is "impersonate/info".
+```
+
 ## Advanced Usage
 
 ### Defining impersonation authorization
@@ -108,12 +113,36 @@ You need to add the method `canBeImpersonated()` to your user model to extend th
 
 ### Using your own strategy
 
-- Getting the manager:
+It is possible to implement your own controller to deal with impersonation:
 ```php
-// With the app helper
-app('impersonate')
-// Dependency Injection
-public function impersonate(ImpersonateManager $manager, $user_id) { /* ... */ }
+class ImpersonateController extends Controller
+{
+    protected $manager;
+    
+    // Dependency Injection
+    public function __construct(ImpersonateManager $manager)
+    {
+        $this->manager = $manager;
+    }
+
+    public function impersonate(Request $request){ /*....*/ }
+    public function leave(Request $request){ /*....*/ }
+}
+```
+```php
+class ImpersonateController extends Controller
+{
+    protected $manager;
+        
+    //Direct app call
+    public function __construct()
+    {
+        $this->manager = app('impersonate');
+    }
+
+    public function impersonate(Request $request){ /*....*/ }
+    public function leave(Request $request){ /*....*/ }
+}
 ```
 
 - Working with the manager:
