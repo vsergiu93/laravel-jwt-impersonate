@@ -115,6 +115,8 @@ You need to add the method `canBeImpersonated()` to your user model to extend th
 
 It is possible to implement your own controller to deal with impersonation:
 ```php
+use Rickycezar\Impersonate\Services\ImpersonateManager;
+
 class ImpersonateController extends Controller
 {
     protected $manager;
@@ -125,8 +127,8 @@ class ImpersonateController extends Controller
         $this->manager = $manager;
     }
 
-    public function impersonate(Request $request){ /*....*/ }
-    public function leave(Request $request){ /*....*/ }
+    public function impersonate(){ /*....*/ }
+    public function leave(){ /*....*/ }
 }
 ```
 ```php
@@ -140,8 +142,8 @@ class ImpersonateController extends Controller
         $this->manager = app('impersonate');
     }
 
-    public function impersonate(Request $request){ /*....*/ }
-    public function leave(Request $request){ /*....*/ }
+    public function impersonate(){ /*....*/ }
+    public function leave(){ /*....*/ }
 }
 ```
 
