@@ -214,6 +214,10 @@ Available options:
     // The custom claim key used to store the original user id in the JWT token.
     'session_key' => 'impersonated_by',
 ```
+```php
+    // The alias for the authentication middleware to be used in the routes.
+    'auth_alias' => 'auth',
+```
 
 ## Licence
 

@@ -2,10 +2,6 @@
 
 namespace Rickycezar\Impersonate;
 
-use Illuminate\Auth\AuthManager;
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Blade;
-use Rickycezar\Impersonate\Guard\SessionGuard;
 use Rickycezar\Impersonate\Middleware\ProtectFromImpersonation;
 use Rickycezar\Impersonate\Services\ImpersonateManager;
 
@@ -27,6 +23,10 @@ class ImpersonateServiceProvider extends \Illuminate\Support\ServiceProvider
     protected $configName = 'laravel-jwt-impersonate';
 
     /**
+     * @var string
+     */
+    protected $authMiddlewareKey = 'auth_middleware';
+    /**
      * Register the service provider.
      *
      * @return void
@@ -44,9 +44,7 @@ class ImpersonateServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->app->alias(ImpersonateManager::class, 'impersonate');
 
         $this->registerRoutesMacro();
-        $this->registerBladeDirectives();
         $this->registerMiddleware();
-        $this->registerAuthDriver();
     }
 
     /**
@@ -60,40 +58,6 @@ class ImpersonateServiceProvider extends \Illuminate\Support\ServiceProvider
     }
 
     /**
-     * Register plugin blade directives.
-     *
-     * @param   void
-     * @return  void
-     */
-    protected function registerBladeDirectives()
-    {
-        Blade::directive('impersonating', function () {
-            return '<?php if (app()["auth"]->check() && app()["auth"]->user()->isImpersonated()): ?>';
-        });
-
-        Blade::directive('endImpersonating', function () {
-            return '<?php endif; ?>';
-        });
-
-        Blade::directive('canImpersonate', function () {
-            return '<?php if (app()["auth"]->check() && app()["auth"]->user()->canImpersonate()): ?>';
-        });
-
-        Blade::directive('endCanImpersonate', function () {
-            return '<?php endif; ?>';
-        });
-
-        Blade::directive('canBeImpersonated', function($expression) {
-            $user = trim($expression);
-            return "<?php if (app()['auth']->check() && app()['auth']->user()->id != {$user}->id && {$user}->canBeImpersonated()): ?>";
-        });
-
-        Blade::directive('endCanBeImpersonated', function() {
-            return '<?php endif; ?>';
-        });
-    }
-
-    /**
      * Register routes macro.
      *
      * @param   void
@@ -102,44 +66,15 @@ class ImpersonateServiceProvider extends \Illuminate\Support\ServiceProvider
     protected function registerRoutesMacro()
     {
         $router = $this->app['router'];
+        $middleware = $this->configName.'.'.$this->authMiddlewareKey;
 
-        $router->macro('impersonate', function () use ($router) {
+        $router->macro('impersonate', function () use ($router, $middleware) {
             $router->get('/impersonate/take/{id}',
-                '\Rickycezar\Impersonate\Controllers\ImpersonateController@take')->name('impersonate')->middleware('auth:api');
+                '\Rickycezar\Impersonate\Controllers\ImpersonateController@take')->name('impersonate')->middleware(config($middleware));
             $router->get('/impersonate/leave',
-                '\Rickycezar\Impersonate\Controllers\ImpersonateController@leave')->name('impersonate.leave')->middleware('auth:api');
+                '\Rickycezar\Impersonate\Controllers\ImpersonateController@leave')->name('impersonate.leave')->middleware(config($middleware));
             $router->get('/impersonate/info',
-                '\Rickycezar\Impersonate\Controllers\ImpersonateController@info')->name('impersonate.info')->middleware('auth:api');
-        });
-    }
-
-    /**
-     * @param   void
-     * @return  void
-     */
-    protected function registerAuthDriver()
-    {
-        /** @var AuthManager $auth */
-        $auth = $this->app['auth'];
-
-        $auth->extend('session', function (Application $app, $name, array $config) use ($auth) {
-            $provider = $auth->createUserProvider($config['provider']);
-
-            $guard = new SessionGuard($name, $provider, $app['session.store']);
-
-            if (method_exists($guard, 'setCookieJar')) {
-                $guard->setCookieJar($app['cookie']);
-            }
-
-            if (method_exists($guard, 'setDispatcher')) {
-                $guard->setDispatcher($app['events']);
-            }
-
-            if (method_exists($guard, 'setRequest')) {
-                $guard->setRequest($app->refresh('request', $guard, 'setRequest'));
-            }
-
-            return $guard;
+                '\Rickycezar\Impersonate\Controllers\ImpersonateController@info')->name('impersonate.info')->middleware(config($middleware));
         });
     }
 

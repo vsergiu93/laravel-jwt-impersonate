@@ -3,24 +3,13 @@
 return [
     
     /**
-     * The key used to store the original user id.
+     * The key used to store the original user id inside the token.
      */
     'session_key' => 'impersonated_by',
 
     /**
-     * The URI to redirect after taking an impersonation.
-     *
-     * Only used in the built-in controller.
-     * * Use 'back' to redirect to the previous page
+     * The alias for the authentication middleware to be used in the routes.
      */
-    'take_redirect_to' => '/',
-
-    /**
-     * The URI to redirect after leaving an impersonation.
-     *
-     * Only used in the built-in controller.
-     * Use 'back' to redirect to the previous page
-     */
-    'leave_redirect_to' => '/',
+    'auth_middleware' => 'auth',
 
 ];

@@ -18,16 +18,21 @@ class ImpersonateManager
      * @var Application
      */
     private $app;
+    /**
+     * Authentication manager
+     * @var
+     */
+    private $auth;
 
     /**
      * UserFinder constructor.
      *
      * @param Application $app
-     * @param Cache $cache
      */
     public function __construct(Application $app)
     {
         $this->app = $app;
+        $this->auth = $app['auth'];
     }
 
     /**
@@ -60,22 +65,26 @@ class ImpersonateManager
      */
     public function getImpersonatorId()
     {
-        return $this->app['auth']->parseToken()->getPayLoad()->get($this->getSessionKey());
+        return $this->auth->parseToken()->getPayLoad()->get($this->getSessionKey());
     }
 
     /**
      * @param   $impersonator
-     * @return  int|null
+     * @return  void
      */
     public function setImpersonatorId($impersonator)
     {
-        $this->app['auth']->customClaims([$this->getSessionKey() => $impersonator->getKey()]);
+        $this->auth->customClaims([$this->getSessionKey() => $impersonator->getKey()]);
     }
 
     /**
      * @param Model $from
      * @param Model $to
      * @return bool
+     * @throws AlreadyImpersonatingException
+     * @throws CantBeImpersonatedException
+     * @throws CantImpersonateException
+     * @throws CantImpersonateSelfException
      */
     public function take($from, $to)
     {
@@ -83,9 +92,9 @@ class ImpersonateManager
             if (!($to->getKey() == $from->getKey())) {
                 if ($to->canBeImpersonated()) {
                     if ($from->canImpersonate()) {
-                        $this->quietLogout();
+                        $this->deferLogout();
                         $this->setImpersonatorId($from);
-                        $token = $this->quietLogin($to);
+                        $token = $this->deferLogin($to);
 
                         $this->app['events']->fire(new TakeImpersonation($from, $to));
 
@@ -105,16 +114,17 @@ class ImpersonateManager
     }
 
     /**
-     * @return  bool
+     * @return string
+     * @throws NotImpersonatingException
      */
     public function leave()
     {
         if ($this->isImpersonating()) {
-            $impersonated = $this->app['auth']->user();
+            $impersonated = $this->auth->user();
             $impersonator = $this->findUserById($this->getImpersonatorId());
-            $this->quietLogout();
+            $this->deferLogout();
             $this->clear();
-            $token = $this->quietLogin($impersonator);
+            $token = $this->deferLogin($impersonator);
 
             $this->app['events']->fire(new LeaveImpersonation($impersonator, $impersonated));
 
@@ -129,21 +139,22 @@ class ImpersonateManager
      */
     public function retrieveToken()
     {
-        return $this->app['auth']->getToken();
+        return $this->auth->getToken();
     }
 
-    public function quietLogout()
+    public function deferLogout()
     {
-        $this->app['auth']->logout();
+        $this->auth->logout();
     }
 
     /**
+     * @param $impersonator
      * @return string
      */
-    public function quietLogin($impersonator)
+    public function deferLogin($impersonator)
     {
-        $token = $this->app['auth']->login($impersonator);
-        $this->app['auth']->setToken($token);
+        $token = $this->auth->login($impersonator);
+        $this->auth->setToken($token);
         return $token;
     }
 
@@ -152,7 +163,7 @@ class ImpersonateManager
      */
     public function clear()
     {
-        $this->app['auth']->customClaims([$this->getSessionKey() => null]);
+        $this->auth->customClaims([$this->getSessionKey() => null]);
     }
 
     /**

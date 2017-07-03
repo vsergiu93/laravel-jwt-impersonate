@@ -24,7 +24,8 @@ class TakeImpersonation
     /**
      * Create a new event instance.
      *
-     * @return  void
+     * @param Model $impersonator
+     * @param Model $impersonated
      */
     public function __construct(Model $impersonator, Model $impersonated)
     {

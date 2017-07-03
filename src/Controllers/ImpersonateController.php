@@ -18,8 +18,9 @@ class ImpersonateController extends Controller
     }
 
     /**
+     * @param Request $request
      * @param   int $id
-     * @return  RedirectResponse
+     * @return RedirectResponse
      */
     public function take(Request $request, $id)
     {
@@ -37,7 +38,8 @@ class ImpersonateController extends Controller
         return response()->json($response);
     }
 
-    /*
+    /**
+     * @param Request $request
      * @return Response
      */
     public function leave(Request $request)
