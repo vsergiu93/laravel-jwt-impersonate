@@ -3,7 +3,7 @@
 **DISCLAIMER:** This is a fork of [lab404/laravel-impersonate](https://github.com/404labfr/laravel-impersonate) patched to work with JWTAuth in a REST API application. I'll Always recommend you to use the original component.  
 
 
-**Laravel Impersonate** makes it easy to **authenticate as your users**. Add a simple **trait** to your **user model** and impersonate as one of your users in one click.
+**Laravel JWT Impersonate** makes it easy to **authenticate as your users**. Add a simple **trait** to your **user model** and impersonate as one of your users in one click.
  
 - [Requirements](#requirements)
 - [Installation](#installation)
@@ -16,9 +16,6 @@
     - [Exceptions](#exceptions)
     - [Events](#events)
 - [Configuration](#configuration)
-- [Tests](#tests)
-- [Contributors](#contributors)
-- [Why Not Just Use loginAsId()?](#rationale)
 
 
 ## Requirements
@@ -91,7 +88,7 @@ route('impersonate.leave') //the url path is "impersonate/leave".
 ```
 
 ```php
-// Generate an URL to leave current impersonation
+// Check the current user impersonation status
 route('impersonate.info') //the url path is "impersonate/info".
 ```
 
@@ -167,13 +164,13 @@ class ImpersonateController extends Controller
 ```php
 $manager = app('impersonate');
 
-// Find an user by its ID
+// Find a user by its ID
 $manager->findUserById($id);
 
-// TRUE if your are impersonating an user.
+// TRUE if you are impersonating an user.
 $manager->isImpersonating();
 
-// Impersonate an user. Pass the original user and the user you want to impersonate. Returns authentication token
+// Impersonate a user. Pass the original user and the user you want to impersonate. Returns authentication token
 $token = $manager->take($from, $to);
 
 // Leave current impersonation. Returns authentication token
@@ -212,9 +209,9 @@ Each exception have a message and a status code available through the respective
 
 There are two events available that can be used to improve your workflow:
 - `TakeImpersonation` is fired when an impersonation is taken.
-- `LeaveImpersonation` is fired when an impersonation is leaved.
+- `LeaveImpersonation` is fired when an impersonation is left.
 
-Each events returns two properties `$event->impersonator` and `$event->impersonated` containing User model isntance.
+Each events returns two properties `$event->impersonator` and `$event->impersonated` containing a User model isntance.
 
 ## Configuration
 
