@@ -18,12 +18,13 @@
 - [Configuration](#configuration)
 - [Tests](#tests)
 - [Contributors](#contributors)
+- [Why Not Just Use loginAsId()?](#rationale)
 
 
 ## Requirements
 
-- Laravel >= 5.4
-- PHP >= 5.6
+- Laravel >= 5.8
+- PHP >= 7.1
 - JWT-Auth >= dev-develop
 
 ## Installation
@@ -45,7 +46,7 @@ composer require rickycezar/laravel-impersonate
 
 ## Simple usage
 
-Impersonate an user:
+Impersonate a user:
 ```php
 $token = Auth::user()->impersonate($other_user);
 // You're now logged as the $other_user and the authentication token is stored in $token.
@@ -62,6 +63,21 @@ $token = Auth::user()->leaveImpersonation();
 In your routes file you can call the `impersonate` route macro if you want to use the built-in controller. 
 ```php
 Route::impersonate();
+```
+
+Alternatively, you can execute this macro with your `RouteServiceProvider`.
+
+```php
+namespace App\Providers;
+
+class RouteServiceProvider extends ServiceProvider
+{
+    public function map() {
+        Route::middleware('web')->group(function (Router $router) {
+            $router->impersonate();
+        });
+    }
+}
 ```
 
 ```php
@@ -107,7 +123,7 @@ You need to add the method `canBeImpersonated()` to your user model to extend th
     public function canBeImpersonated()
     {
         // For example
-        return $this->can_be_impersonate == 1;
+        return $this->can_be_impersonated == 1;
     }
 ```
 
