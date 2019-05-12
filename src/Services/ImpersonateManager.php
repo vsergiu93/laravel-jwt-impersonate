@@ -126,7 +126,7 @@ class ImpersonateManager
             $this->clear();
             $token = $this->deferLogin($impersonator);
 
-            $this->app['events']->fire(new LeaveImpersonation($impersonator, $impersonated));
+            $this->app['events']->dispatch(new LeaveImpersonation($impersonator, $impersonated));
 
             return $token;
         } else {
