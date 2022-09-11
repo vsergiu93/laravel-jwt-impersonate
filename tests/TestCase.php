@@ -9,19 +9,15 @@ use Orchestra\Database\ConsoleServiceProvider;
 class TestCase extends \Orchestra\Testbench\TestCase
 {
     /**
-     * @param   void
      * @return  void
      */
-    public function setUp()
+    public function setUp():void
     {
         parent::setUp();
 
         $this->artisan('migrate', ['--database' => 'testbench']);
 
-        $this->loadMigrationsFrom([
-            '--database' => 'testbench',
-            '--realpath' => realpath(__DIR__.'/../migrations'),
-        ]);
+        $this->loadMigrationsFrom(dirname(__DIR__) . '/migrations');
 
         $this->setUpRoutes();
     }
@@ -42,6 +38,8 @@ class TestCase extends \Orchestra\Testbench\TestCase
 
         // Setup the right User class (using stub)
         $app['config']->set('auth.providers.users.model', User::class);
+        $app['config']->set('auth.guards.api.driver', 'jwt');
+        $app['config']->set('auth.guards.web.driver', 'jwt');
     }
 
     /**
