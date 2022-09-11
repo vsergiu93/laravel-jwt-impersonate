@@ -14,14 +14,15 @@
       "laravel-plugin"
     ],
     "require": {
-      "php": "^7.1.3|^8.0",
-      "laravel/framework": ">=5.8",
-      "tymon/jwt-auth": "*"
+        "php": "^8.0 | ^8.1",
+        "laravel/framework": "^6.0 | ^7.0 | ^8.0 | ^9.0",
+        "php-open-source-saver/jwt-auth": "^2.0"
     },
     "require-dev": {
-      "phpunit/phpunit": "^7.5 || ^8.0",
-      "orchestra/testbench": "~3.8.0",
-      "orchestra/database": "~3.8.0"
+        "phpunit/phpunit": "^7.5 | ^8.0 | ^9.0",
+        "mockery/mockery": "^1.3.3",
+        "orchestra/testbench": "^4.0 | ^5.0 | ^6.0 | ^7.0",
+        "orchestra/database": "^4.0 | ^5.0 | ^6.0 | ^7.0"
     },
     "license": "MIT",
     "authors": [
